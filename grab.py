@@ -761,21 +761,10 @@ def is_domain_resolvable(domain):
 
 def print_banner():
     print(f"""{CYAN}
-    
-　　　⣀⠤⠔⠒⠒⠒⠒⠒⠒⠒⠦⢄⣀⠀⠀⠀⠀
-　⢀⡴⠋　　　　　　　　⠈⠑⢄⠀⠀
-⢀⠎　　　　　　　　　　　⠈⢣⠀
-⢸　⡄　　　　　　　　　　⢢⠈⡇
-⢸　⣇　　　　　　　　　　⡼　⡇
-⠘⡆⢸　⢀⣀⣤⣄⡀　　⢀⣤⣤⣄⡀　⡇⡸⠀
-　⠘⣾⠀⣿⣿⣿⣿⣿　　⣿⣿⣿⣿⣿　⡗⠁⠀
-　⢸⣿⠀⠙⢿⣿⠿⠃⢠⢠⡀⠙⠿⣿⠿⠃　⡇⠀⠀
-　⠁⢸⣄　　　⢠⣿⢸⣿⠀⠀⠀⠀⠀⣠⠇⠀⠀
-　　⡏⢷⡄　　⠘⠟⠈⠿⠁⠀⠀⢠⡞⡹⠁⠀⠀⠀
-　　⢹⠀⠸⠘⢢⢠⠤⠤⡤⡄⢰⢡⠁⠀⡇⠀⠀⠀⠀
-　　⢸⠀⠀⠣⣹⢸⠒⠒⡗⡇⣩⠌⢀⠀⡇⠀⠀⠀⠀
-　　⠈⢧⡀⠀⠀⠉⠉⠉⠉⠁⠀⠀⣀⠜⠀⠀⠀⠀⠀
-　　　　⠉⠓⠢⠤⠤⠤⠔⠊⠁⠀⠀⠀⠀⠀⠀ 
+⚠️ WARNING & USE AT YOUR OWN RISK
+Web‑reconn is for research and authorized testing only. Run this tool only against systems you own or have explicit written permission to test. Using this tool to access, extract, or damage systems without permission is illegal.
+
+THE DEVELOPER IS NOT LIABLE for illegal use or damage caused by users. By running this tool in non‑passive mode you accept full legal responsibility for your actions and consequences.
 {RESET}""")
 
 def main():
